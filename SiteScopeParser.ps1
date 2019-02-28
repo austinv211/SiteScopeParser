@@ -10,6 +10,7 @@ function Get-ParsedData {
         [String]$FilePath
     )
 
+    #get the xml data from the filepath provided
     $xml = [xml] (Get-Content -Path $FilePath)
 
     #store the report in a variable
@@ -42,98 +43,50 @@ function Get-ParsedData {
     # get cpu Data summary
     $cpuSummary = Get-SummarizedCPUData -CPUData $cpuResult
 
-    #get Parsed Physical Memory Details
-    # $pm_virtual_mem_or_swap_space_used_per = Get-ParsedGroupData -RowData $rowResult -LabelName "Physical Memory Monitor on (?<ServerName>.+) Virtual Memory Or Swap Space Used %"
-
-    # $pm_virtual_mem_or_swap_space_mb_free = Get-ParsedGroupData -RowData $rowResult -LabelName "Physical Memory Monitor on (?<ServerName>.+) Virtual Memory Or Swap Space MB Free"
-
-    # $pm_mb_free = Get-ParsedGroupData -RowData $rowResult -LabelName "Physical Memory Monitor on (?<ServerName>.+) MB Free"
-
-    # $pm_per_used = Get-ParsedGroupData -RowData $rowResult -LabelName "Physical Memory Monitor on (?<ServerName>.+) Percent Used"
-
-    # $pm_pm_mb_free = Get-ParsedGroupData -RowData $rowResult -LabelName "Physical Memory Monitor on (?<ServerName>.+) Physical Memory MB Free"
-
+    #get Memory Data
     $pm_pm_used_per = Get-ParsedGroupData -RowData $rowResult -LabelName "Physical Memory Monitor on (?<ServerName>.+) Physical Memory Used %"
-
-    # $pm_pages_sec = Get-ParsedGroupData -RowData $rowResult -LabelName "Physical Memory Monitor on (?<ServerName>.+) Pages/sec"
-
-    # #get ping details
-    # $pingDetails = Get-ParsedGroupData -RowData $rowResult -LabelName "Ping Monitor on (?<ServerName>.+) Round Trip Time"
-
-    #get virtual memory details
-    # $vm_virtual_mem_or_swap_space_used_per = Get-ParsedGroupData -RowData $rowResult -LabelName "Virtual Memory Utilization on (?<ServerName>.+) Virtual Memory Or Swap Space Used %"
-
-    # $vm_virtual_mem_or_swap_space_mb_free = Get-ParsedGroupData -RowData $rowResult -LabelName "Virtual Memory Utilization on (?<ServerName>.+) Virtual Memory Or Swap Space MB Free"
-
-    # $vm_mb_free = Get-ParsedGroupData -RowData $rowResult -LabelName "Virtual Memory Utilization on (?<ServerName>.+) MB Free"
-
-    # $vm_per_used = Get-ParsedGroupData -RowData $rowResult -LabelName "Virtual Memory Utilization on (?<ServerName>.+) Percent Used"
-
-    # $vm_pm_mb_free = Get-ParsedGroupData -RowData $rowResult -LabelName "Virtual Memory Utilization on (?<ServerName>.+) Physical Memory MB Free"
-
-    # $vm_pm_used_per = Get-ParsedGroupData -RowData $rowResult -LabelName "Virtual Memory Utilization on (?<ServerName>.+) Physical Memory Used %"
-
-    # $vm_pages_sec = Get-ParsedGroupData -RowData $rowResult -LabelName "Virtual Memory Utilization on (?<ServerName>.+) Pages/sec"
-
 
     # add avg to Memory Used
     $physicalMemSummary = Get-SummarizedMemoryData -MemoryData $pm_pm_used_per
 
-
+    #TODO: Make this dynamic
     #get diskspace details
     $dp_1 = Get-ParsedGroupData -RowData $rowResult -LabelName "Diskspace Utilization Monitor on (?<ServerName>.+) BrowsableValue1"
-
     $dp_2 = Get-ParsedGroupData -RowData $rowResult -LabelName "Diskspace Utilization Monitor on (?<ServerName>.+) BrowsableValue2"
-
     $dp_3 = Get-ParsedGroupData -RowData $rowResult -LabelName "Diskspace Utilization Monitor on (?<ServerName>.+) BrowsableValue3"
-
     $dp_4 = Get-ParsedGroupData -RowData $rowResult -LabelName "Diskspace Utilization Monitor on (?<ServerName>.+) BrowsableValue4"
 
-    # $dp_counters = Get-ParsedGroupData -RowData $rowResult -LabelName "Diskspace Utilization Monitor on (?<ServerName>.+) Counters In Error"
-
+    # put the disk data into an array for summarizing
     $diskData = @($dp_1, $dp_2, $dp_3, $dp_4)
+
+    # summarize the disk data
     $browsSummary = Get-SummarizedDiskData -DiskData $diskData
 
 
-    #export the data to an excel sheet
+    #get the filepath to export data
     $outputFilePath = "ParsedSiteScopeReport_" + (Get-Date -Format "MM_dd_yyyy_hh_mm_ss") + ".xlsx"
 
+    #export the data to an excel file
     $uptimeSummary | Export-Excel -Path $outputFilePath -WorksheetName "Uptime Summary" -TableName "UptimeSummaryTable" -AutoSize
     $measurementSummary | Export-Excel -Path $outputFilePath -WorksheetName "Measurement Summary" -TableName "MeasureSummaryTable" -AutoSize
     $errorTimeSummary | Export-Excel -Path $outputFilePath -WorksheetName "Error Time Summary" -TableName "ErrorTimeSummaryTable" -AutoSize
     $cpuSummary | Export-Excel -Path $outputFilePath -WorksheetName "CPU" -TableName "CPUTable" -AutoSize
-    # $pm_virtual_mem_or_swap_space_used_per | Export-Excel -Path $outputFilePath -WorksheetName "PM_VM or Swap Space Used %" -TableName "PMVMorSwapPerTable" -AutoSize
-    # $pm_virtual_mem_or_swap_space_mb_free | Export-Excel -Path $outputFilePath -WorksheetName "PM_VM or Swap Space MB Free" -TableName "PMVMorSwapMBTable" -AutoSize
-    # $pm_mb_free | Export-Excel -Path $outputFilePath -WorksheetName "PM_MB Free" -TableName "PMMBFreeTable" -AutoSize
     $physicalMemSummary | Export-Excel -Path $outputFilePath -WorksheetName "Memory" -TableName "MemoryTable" -AutoSize
-    # $pm_pm_mb_free | Export-Excel -Path $outputFilePath -WorksheetName "PM_Physical Memory MB Free" -TableName "PMPMMemMBTable" -AutoSize
-    # $pm_pm_used_per | Export-Excel -Path $outputFilePath -WorksheetName "PM_Physical Memory Used %" -TableName "PMPMUserPerTable" -AutoSize
-    # $pm_pages_sec | Export-Excel -Path $outputFilePath -WorksheetName "PM_ Pages per Sec" -TableName "PMPagesSecTable" -AutoSize
-    # $pingDetails | Export-Excel -Path $outputFilePath -WorksheetName "Ping Monitor Round Trip Time" -TableName "PingDetailsTable" -AutoSize
-    # $vm_virtual_mem_or_swap_space_used_per | Export-Excel -Path $outputFilePath -WorksheetName "VM_VM or Swap Space Used %" -TableName "VMVMSwapSpacePerTable" -AutoSize
-    # $vm_virtual_mem_or_swap_space_mb_free | Export-Excel -Path $outputFilePath -WorksheetName "VM_VM or Swap Space MB Free" -TableName "VMVMSwapSpaceMBFreeTable" -AutoSize
-    # $vm_mb_free | Export-Excel -Path $outputFilePath -WorksheetName "VM_MB Free" -TableName "VMMBFreeTable" -AutoSize
-    # $vm_pm_mb_free | Export-Excel -Path $outputFilePath -WorksheetName "VM_Physical Memory MB Free" -TableName "VMPMMBFreeTable" -AutoSize
-    # $vm_pm_used_per | Export-Excel -Path $outputFilePath -WorksheetName "VM_Physical Memory Used %" -TableName "VMPMUsedPerTable" -AutoSize
-    # $vm_pages_sec | Export-Excel -Path $outputFilePath -WorksheetName "VM_ Pages per Sec" -TableName "VMPagesSecTable" -AutoSize
-    # $dp_1 | Export-Excel -Path $outputFilePath -WorksheetName "DiskSpace Util Browsable1" -TableName "DiskSpaceBrowse1Table" -AutoSize
-    # $dp_2 | Export-Excel -Path $outputFilePath -WorksheetName "DiskSpace Util Browsable2" -TableName "DiskSpaceBrowse2Table" -AutoSize
-    # $dp_3 | Export-Excel -Path $outputFilePath -WorksheetName "DiskSpace Util Browsable3" -TableName "DiskSpaceBrowse3Table" -AutoSize
-    # $dp_4 | Export-Excel -Path $outputFilePath -WorksheetName "DiskSpace Util Browsable4" -TableName "DiskSpaceBrowse4Table" -AutoSize
-    # $dp_counters | Export-Excel -Path $outputFilePath -WorksheetName "DiskSpace Util Counter In Error" -TableName "DiskSpaceCounterTable" -AutoSize
     $browsSummary | Export-Excel -Path $outputFilePath -WorksheetName "File System" -TableName "DiskSpaceTable" -AutoSize
 
 }
 
-
+# Function for getting the parsed uptime summary
 function Get-ParsedUptimeSummary {
     param(
         [Parameter(Mandatory=$true)]
         [System.Object[]]$SummaryRow
     )
 
+    # array to store the result
     $result = @()
 
+    # loop through the summary data and add into the object array
     for ($i = 0; $i -lt $SummaryRow.Count; $i++) {
         $obj = New-Object -TypeName psobject
 
@@ -146,11 +99,15 @@ function Get-ParsedUptimeSummary {
         $result += $obj
     }
 
-    return $result |
+    #use custom selection to modify our property names
+    $result = $result |
     Select-Object @{Label="Name";Expression={$_.name}}, @{Label="Uptime %";Expression={$_.uptime}}, @{Label="Error %";Expression={$_.error}}, @{Label="Warning %";Expression={$_.warning}}, @{Label="Last";Expression={$_.last}}
+
+    # return the result
+    return $result 
 }
 
-
+# function for getting the parsed measurement summary
 function Get-ParsedMeasurementSummary {
     param(
         [Parameter(Mandatory=$true)]
@@ -175,7 +132,7 @@ function Get-ParsedMeasurementSummary {
     Select-Object @{Label="Name";Expression={$_.monitor}}, @{Label="Measurement";Expression={$_.label}}, @{Label="Max";Expression={$_.max}}, @{Label="Avg";Expression={$_.ave}}, @{Label="Last";Expression={$_.last}}
 }
 
-
+#function for getting the parsed error time summary
 function Get-ParsedErrorTimeSummary {
     param(
         [Parameter(Mandatory=$true)]
@@ -200,6 +157,7 @@ function Get-ParsedErrorTimeSummary {
     Select-Object @{Label="Name";Expression={$_.name}}, @{Label="Time in Error";Expression={$_.errorTime}}
 }
 
+# function to get the group data based on the property label
 function Get-ParsedGroupData {
     param(
         [Parameter(Mandatory=$true)]
@@ -234,7 +192,7 @@ function Get-ParsedGroupData {
     $result
 }
 
-
+# function to parse the row data into grouped data based on the property label
 function Get-ParsedRowData {
     param(
         [Parameter(Mandatory=$true)]
@@ -270,6 +228,7 @@ function Get-ParsedRowData {
 
 }
 
+# function to get the summarized data from the disk utilization monitor
 Function Get-SummarizedDiskData {
     param (
         [Parameter(Mandatory=$true)]
@@ -325,7 +284,7 @@ Function Get-SummarizedDiskData {
     return $browsSummary
 }
 
-
+# Function to get the summarized memory data from the data grabbed from the physical memory monitor
 Function Get-SummarizedMemoryData {
 
     param (
@@ -381,6 +340,7 @@ Function Get-SummarizedMemoryData {
     return $physicalMemSummary
 }
 
+#function to get the summarized cpu data from the data grabbed from the cpu utlization monitor
 function Get-SummarizedCPUData {
     
     param (
