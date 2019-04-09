@@ -3,6 +3,12 @@ import sys
 from bs4 import BeautifulSoup
 from os import remove
 
+# function to insert exception criteria into the soup object
+def addExceptionCriteria(soup):
+    html_doc = open("HTML/ExceptionCriteria.html", "r+")
+    criteria_soup = BeautifulSoup(html_doc, 'html.parser')
+    soup.find("section").insert_after(criteria_soup)
+
 #function to change header
 def changeHeader(soup):
     #find our header
@@ -48,12 +54,14 @@ def editHTML(fileName):
         soup = BeautifulSoup(html_doc,'html.parser')
         #change the header
         changeHeader(soup)
+        #remove data tables
+        removeDataTables(soup)
+        #add exception criteria
+        addExceptionCriteria(soup)
         #change the logo
         changeLogo(soup)
         #remove ping graphs
         removePingMonitorGraphs(soup)
-        #remove data tables
-        removeDataTables(soup)
         #close and format the doc
         html_doc.close()
         html = soup.prettify("utf-8")
@@ -67,6 +75,10 @@ def editHTML(fileName):
 
 #convert to pdf function
 def convertToPDF(outputPath):
+    """
+    try to use pdf kit to to render the edited html as pdf
+    then remove the edited html document upon successful render
+    """
     try:
         pdfkit.from_file("HTML/editedHTML.html", outputPath)
         remove("HTML/editedHTML.html")
