@@ -9,6 +9,8 @@ def changeHeader(soup):
     header = soup.find("h2")
     header.contents[0].replaceWith("Azure Monthly Exception Report")
 
+# function to remove the data tables from the html report based on css class selector
+# this keep in the error time summary table
 def removeDataTables(soup):
     tables = soup.select(".data-table")
     for i in range(0, len(tables)):
@@ -17,7 +19,10 @@ def removeDataTables(soup):
 
 #function to change the logo
 def changeLogo(soup):
-    #find the h1
+    """
+    In this function we gather the h1 where the original logo is held, soup.find receives the first result.
+    We then create a soup object from custom html with the new logo and replace the h1 find result
+    """
     h1 = soup.find("h1")
     img_soup = BeautifulSoup("<img src='https://perspecta.com/sites/default/files/perspecta_logo_tm_0.png' height='100' >", 'html.parser')
     img = img_soup.img
@@ -25,6 +30,10 @@ def changeLogo(soup):
 
 #function to remove ping monitor graphs
 def removePingMonitorGraphs(soup):
+    """
+    We use a css selector to find all h3's nested withing a center tag, 
+    then decompose the parent if the h3 text content contains 'Ping Monitor'
+    """
     h3_ping_find = soup.select("center > h3")
     for h3 in h3_ping_find:
         if "Ping Monitor" in h3.contents[0]:
