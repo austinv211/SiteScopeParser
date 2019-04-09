@@ -1,0 +1,26 @@
+
+<div class="main-body" tdgn="center">
+    <h3 id="criteria-header">CRITERIA FOR EXCEPTIONS</h2>
+    <h3 id="category-header-cpu">CPU</h3>
+    <table class="data-table" id="cpu-table">
+        <tr><td>Utilization greater than 70% for sustained periods of time.</td></tr>
+        <tr><td>Dramatic increases in utilization.</td></tr>
+        <tr><td>Upward steps in CPU uttdzation equivalent to the capacity of one or more CPUs.</td></tr>     
+    </table>
+
+    <h3 id="category-header-memory">MEMORY</h3>
+    <table class="data-table" id="memory-table">
+        <tr><td>Dramatic drops in free memory.</td></tr> 
+        <tr><td>Steady decline in free memory.</td></tr>
+        <tr><td>Less than 80% available swap space.</td></tr>
+        <tr><td>Review of other surrogate memory parameters.</td></tr>
+    </table>
+
+    <h3 id="category-header-filey">FILE SYSTEM</h3>
+    <table class="data-table" id="memory-table">       
+        <tr><td>Dramatic increases in space usage for non-database file systems.</td></tr>
+        <tr><td>For database file systems, ensure that DBAs are monitoring sub-allocated file systems.</td></tr>
+        <tr><td>Greater than or equal to 85% utilization Warning threshold.</td></tr>
+        <tr><td>Less than or equal to 95% utilization Critical threshold.</td></tr>
+    </table>
+</div>
